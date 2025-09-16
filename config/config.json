@@ -1,6 +1,6 @@
 {
   "site": {
-    "title": "Bigspring Light Nextjs",
+    "title": "Green Docs - Gestão de Documentos Ambientais",
     "base_url": "/",
     "favicon": "/images/favicon.png",
     "logo": "/images/logo.png",
@@ -17,20 +17,20 @@
 
   "nav_button": {
     "enable": true,
-    "label": "Get Started",
-    "link": "/contact"
+    "label": "Entrar",
+    "link": "https://greendocs-repository-4v.vercel.app/login"
   },
 
   "params": {
     "contact_form_action": "",
     "tag_manager_id": "",
     "footer_content": "Lorem ipsum dolor sit amet, consectetur elit. Consjat tristique eget amet, tempus eu at cttur.",
-    "copyright": "Designed and Developed By [Themefisher](https://themefisher.com/)"
+    "copyright": "Powered by Sonacloud 2025. All rights reserved."
   },
 
   "metadata": {
-    "meta_author": "Themefisher",
+    "meta_author": "Gerson Cavalcante",
     "meta_image": "",
-    "meta_description": "A SAAS template for nextjs"
+    "meta_description": "Sistema para Gestão de Documentos Ambientais - Licenças, Relatórios, Estudos, etc."
   }
 }
