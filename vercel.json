@@ -1,9 +1,12 @@
 {
-  "rewrites": [
+  "redirects": [
     {
       "source": "/vault",
-      "destination": "https://v0-greendocs-interface.vercel.app/vault"
-    },
+      "destination": "/vault/login",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
     {
       "source": "/vault/:path*",
       "destination": "https://v0-greendocs-interface.vercel.app/vault/:path*"
