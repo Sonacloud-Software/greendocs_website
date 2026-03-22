@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/vault",
+      "destination": "https://greenvaultapp.com.br/vault"
+    },
+    {
+      "source": "/vault/:path*",
+      "destination": "https://greenvaultapp.com.br/vault/:path*"
+    }
+  ]
+}
