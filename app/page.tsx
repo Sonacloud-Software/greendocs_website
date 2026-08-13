@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import {
   ArrowRight,
+  ArrowUp,
   BellRing,
   Bot,
-  ChevronDown,
   CircleCheck,
   Columns3,
   FileCheck2,
@@ -16,6 +16,8 @@ import {
   Sparkles,
   X,
 } from 'lucide-react'
+
+import { getSiteLogoSrc } from '@/lib/assets/logo'
 
 const features = [
   {
@@ -46,15 +48,46 @@ const steps = [
   ['03', 'Acompanhe com clareza', 'Tenha visibilidade do que está atualizado, pendente ou em risco.'],
 ]
 
-function Brand() {
+function BrandWordmark() {
   return (
-    <a href="#top" className="flex items-center gap-2.5" aria-label="GreenDocs — início">
-      <span className="grid size-8 place-items-center rounded-lg bg-primary text-primary-foreground">
-        <Leaf size={17} strokeWidth={2.5} />
+    <span className="text-xl font-semibold tracking-[-0.04em] text-primary">
+      GreenDocs
+    </span>
+  )
+}
+
+function BrandFallback() {
+  return (
+    <>
+      <span className="grid size-11 place-items-center rounded-lg bg-primary text-primary-foreground">
+        <Leaf size={20} strokeWidth={2.5} />
       </span>
-      <span className="text-[17px] font-semibold tracking-[-0.04em] text-foreground">
-        Green<span className="text-primary">Docs</span>
-      </span>
+      <BrandWordmark />
+    </>
+  )
+}
+
+function Brand() {
+  const [logoFailed, setLogoFailed] = useState(false)
+
+  return (
+    <a href="#top" className="flex items-center gap-1.5" aria-label="GreenDocs — início">
+      {logoFailed ? (
+        <BrandFallback />
+      ) : (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={getSiteLogoSrc()}
+            alt=""
+            width={56}
+            height={56}
+            className="h-12 w-auto shrink-0"
+            onError={() => setLogoFailed(true)}
+          />
+          <BrandWordmark />
+        </>
+      )}
     </a>
   )
 }
@@ -70,11 +103,63 @@ function SectionEyebrow({ children }: { children: ReactNode }) {
 
 export default function Page() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [showBackToTop, setShowBackToTop] = useState(false)
   const [contactSent, setContactSent] = useState(false)
+  const [contactSubmitting, setContactSubmitting] = useState(false)
+  const [contactError, setContactError] = useState<string | null>(null)
 
-  function handleContactSubmit(event: FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    function onScroll() {
+      setShowBackToTop(window.scrollY > 400)
+    }
+
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  async function handleContactSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setContactSent(true)
+    setContactError(null)
+
+    const form = event.currentTarget
+    const formData = new FormData(form)
+    const payload = {
+      name: String(formData.get('name') ?? ''),
+      email: String(formData.get('email') ?? ''),
+      message: String(formData.get('message') ?? ''),
+    }
+
+    setContactSubmitting(true)
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      let data: { error?: string } = {}
+
+      try {
+        data = (await response.json()) as { error?: string }
+      } catch {
+        setContactError('Resposta inválida do servidor. Tente novamente.')
+        return
+      }
+
+      if (!response.ok) {
+        setContactError(data.error ?? 'Não foi possível enviar sua mensagem.')
+        return
+      }
+
+      setContactSent(true)
+      form.reset()
+    } catch {
+      setContactError('Não foi possível enviar sua mensagem. Verifique sua conexão e tente novamente.')
+    } finally {
+      setContactSubmitting(false)
+    }
   }
 
   return (
@@ -93,9 +178,6 @@ export default function Page() {
             <a className="transition-colors hover:text-foreground" href="#como-funciona">
               Como funciona
             </a>
-            <a className="flex items-center gap-1 transition-colors hover:text-foreground" href="#recursos">
-              Recursos <ChevronDown size={14} />
-            </a>
             <a className="transition-colors hover:text-foreground" href="#pesquisa-ia">
               Pesquisa com IA
             </a>
@@ -112,7 +194,7 @@ export default function Page() {
               Entrar
             </a>
             <a
-              href="#contato"
+              href="https://greenvaultapp.com.br/vault/login"
               className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5"
             >
               Começar agora
@@ -138,9 +220,6 @@ export default function Page() {
               </a>
               <a href="#como-funciona" onClick={() => setMenuOpen(false)}>
                 Como funciona
-              </a>
-              <a href="#recursos" onClick={() => setMenuOpen(false)}>
-                Recursos
               </a>
               <a href="#contato" onClick={() => setMenuOpen(false)}>
                 Contato
@@ -524,11 +603,18 @@ export default function Page() {
               <p className="text-xs leading-5 text-muted-foreground">Responderemos em até um dia útil.</p>
               <button
                 type="submit"
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:-translate-y-0.5 hover:shadow-lg"
+                disabled={contactSubmitting}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-none"
               >
-                {contactSent ? 'Mensagem enviada' : 'Enviar mensagem'} <ArrowRight size={16} />
+                {contactSubmitting ? 'Enviando...' : contactSent ? 'Mensagem enviada' : 'Enviar mensagem'}{' '}
+                <ArrowRight size={16} />
               </button>
             </div>
+            {contactError && (
+              <p role="alert" className="mt-4 text-sm font-medium text-destructive">
+                {contactError}
+              </p>
+            )}
             {contactSent && (
               <p role="status" className="mt-4 text-sm font-medium text-primary">
                 Recebemos sua mensagem. Em breve entraremos em contato.
@@ -541,20 +627,19 @@ export default function Page() {
       <footer className="bg-background">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between lg:px-8">
           <Brand />
-          <div className="flex flex-wrap gap-5">
-            <a href="#produto" className="hover:text-foreground">
-              Produto
-            </a>
-            <a href="#como-funciona" className="hover:text-foreground">
-              Como funciona
-            </a>
-            <a href="mailto:hello@greendocs.com" className="hover:text-foreground">
-              Contato
-            </a>
-          </div>
-          <p>© 2026 GreenDocs · SonaCloud</p>
+          <p>© 2026 GreenDocs · SonaCloud Software</p>
         </div>
       </footer>
+
+      {showBackToTop && (
+        <a
+          href="#top"
+          className="fixed bottom-6 right-6 z-50 grid size-12 place-items-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25 transition hover:-translate-y-0.5 hover:shadow-xl"
+          aria-label="Voltar ao início"
+        >
+          <ArrowUp size={20} />
+        </a>
+      )}
     </main>
   )
 }

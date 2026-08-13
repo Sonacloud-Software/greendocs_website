@@ -1,9 +1,9 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
 .pnp.js
+.pnp.cjs
+.yarn/install-state.gz
 yarn.lock
 package-lock.json
 
@@ -16,11 +16,11 @@ package-lock.json
 
 # production
 /build
-/.json
 
 # misc
 .DS_Store
 *.pem
+next-env.d.ts
 
 # debug
 npm-debug.log*
@@ -28,14 +28,17 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# local env files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# env — keep .env.example
+.env
+.env*.local
 
 # vercel
 .vercel
 
-# Local Netlify folder
-.netlify
+# typescript
+*.tsbuildinfo
+
+# IDE
+.idea
+.vscode
+*.swp
